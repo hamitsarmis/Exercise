@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using PublicApi.Helpers;
 using PublicApi.Services;
-using System.IO.Compression;
 
 namespace PublicApi.Controllers
 {
