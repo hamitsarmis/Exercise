@@ -1,22 +1,24 @@
 ﻿using System.Collections.Concurrent;
 using PublicApi.Entities;
 using PublicApi.Helpers;
+using PublicApi.Interfaces;
 
 namespace PublicApi.Services
 {
-    public class QueueService : IHostedService
+    public class QueueService : IHostedService, IQueueService
     {
         private readonly ConcurrentQueue<Job> _queue;
         private readonly ConcurrentDictionary<Guid, Job> _allJobs;
         private readonly ILogger<QueueService> _logger;
-        private readonly int _pollingTime = 1000;
+        private readonly int _pollingTime = 500;
         private CancellationTokenSource _cancellationTokenSource;
 
         public QueueService(IConfiguration configuration, ILogger<QueueService> logger)
         {
             _queue = new();
             _allJobs = new();
-            _ = int.TryParse(configuration["PollingTime"], out _pollingTime);
+            if (!int.TryParse(configuration["PollingTime"], out _pollingTime))
+                _pollingTime = 500;
             _logger = logger;
         }
 

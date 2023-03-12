@@ -15,7 +15,7 @@ namespace PublicApi.Controllers
         }
 
         [HttpPost("login")]
-        public ActionResult<UserDto> Login([FromBody]LoginDto loginDto)
+        public IActionResult Login([FromBody]LoginDto loginDto)
         {
             var user = AppUser.ValidUsers.SingleOrDefault(x => x.UserName == loginDto.UserName);
 
@@ -23,10 +23,10 @@ namespace PublicApi.Controllers
 
             if (user.Password != loginDto.Password) return Unauthorized("Invalid username or password");
 
-            return new UserDto
+            return Ok(new UserDto
             {
                 Token = _tokenService.CreateToken(user)
-            };
+            });
         }
     }
 }

@@ -9,11 +9,11 @@ var config = new ConfigurationBuilder()
 int totalRequests = 0, requestsFailedToSend = 0, otherExceptions = 0,
     requestsFailedWithErrorStatus = 0;
 
-int concurrentWorkers = int.TryParse(config["ConcurrentWorkers"],
-    out concurrentWorkers) ? concurrentWorkers : 1000;
-int requestsPerWorker = int.TryParse(config["RequestsPerWorker"],
-    out requestsPerWorker) ? requestsPerWorker : 100;
-string remoteAddress = config["RemoteAddress"] ?? "https://localhost:7190/";
+var appSettings = config.Get<Client.AppSettings>();
+
+int concurrentWorkers = appSettings?.ConcurrentWorkers ?? 1000;
+int requestsPerWorker = appSettings?.RequestsPerWorker ?? 100;
+string remoteAddress = appSettings?.RemoteAddress ?? "https://localhost:7190/";
 
 Console.WriteLine($"Creating and sending {concurrentWorkers * requestsPerWorker:N0}" +
     $" requests to {remoteAddress}");
