@@ -35,7 +35,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Logging.AddConsole();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
-if (bool.TryParse(config["UseAuthentication"], out bool useAuthentication) && !useAuthentication)
+if (!config.GetValue("UseAuthentication", false))
     builder.Services.AddSingleton<IAuthorizationHandler, AllowAnonymous>();
 
 var app = builder.Build();

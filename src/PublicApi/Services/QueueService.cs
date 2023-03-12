@@ -17,8 +17,7 @@ namespace PublicApi.Services
         {
             _queue = new();
             _allJobs = new();
-            if (!int.TryParse(configuration["PollingTime"], out _pollingTime))
-                _pollingTime = 500;
+            _pollingTime = configuration.GetValue("PollingTime", defaultValue: 500);
             _logger = logger;
         }
 
