@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PublicApi.Helpers;
 using PublicApi.Services;
 using System.IO.Compression;
@@ -17,12 +18,14 @@ namespace PublicApi.Controllers
         }
 
         [HttpPost("enqueue")]
+        [Authorize]
         public IActionResult Enqueue(int[] item)
         {
             var result = _queueService.Enqueue(item);
             return Ok(result);
         }
 
+        [Authorize(Policy = "RequireAdminRole")]
         [HttpGet("get-jobs")]
         public IActionResult GetJobs([FromQuery]
             PaginationParams paginationParams)

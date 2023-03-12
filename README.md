@@ -31,6 +31,28 @@ You can use <mark>Client</mark> project to execute some requests with random arr
     /Queue/get-job?jobId=1cf54c56-b237-4930-8b8d-561d9b473f3a
     ```
 We might be handling too many requests to retrieve from server. So, pagination is added for get-jobs operation.
+### Authentication and Authorization
+
+For the sake of simplicity, only two users are defined:
+- admin:admin with roles: admin, user
+- john:john with roles: user
+
+Here are the rules:
+- "Enqueue" operation may be executed by any user,
+- "Get Jobs" operation may only be executed by admin role,
+- "Get Job" operation do not require any authentication.
+- To make a request you should first invoke login:
+    ```
+    /login
+    {
+      "userName": "admin",
+      "password": "admin"
+    }
+    ```
+You can use returned token as a bearer token.
+#### To disable or enable authentication and authorization:
+Just change UseAuthentication config value to true or false.
+By default it is disabled.
 ### Run unit-tests
 
 You can either run the unit tests from terminal with these commands:
@@ -38,7 +60,7 @@ You can either run the unit tests from terminal with these commands:
 cd tests/UnitTests
 dotnet test
 ```
-Or use Test Explorer on Visual Studio. <br/>
+Or use Test Explorer on Visual Studio. <br/><br/>
 The main purpose of this project is to demonstrate the fundemantals of dotnet WebApi and multithreaded queue processing.<br/>
 
-Please feel free to ask if you have any questions
+Please feel free to ask if you have any questions.
