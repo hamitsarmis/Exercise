@@ -1,6 +1,8 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using PublicApi.Entities;
+using PublicApi.Helpers;
 using PublicApi.Services;
 
 namespace UnitTests;
@@ -51,5 +53,6 @@ public class QueueServiceTests
         });
 
         Assert.NotNull(allJobs);
+        Assert.IsType<PagedList<Job>>(allJobs);
     }
 }
