@@ -15,7 +15,14 @@ namespace UnitTests
 
         public QueueControllerTests()
         {
-            _queueServiceMock = new Mock<QueueService>(Mock.Of<IConfiguration>(),
+            var inMemorySettings = new List<KeyValuePair<string, string?>>
+            {
+                new KeyValuePair<string, string?>("PollingTime", "500")
+            };
+            IConfiguration configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(inMemorySettings)
+                .Build();
+            _queueServiceMock = new Mock<QueueService>(configuration,
                 Mock.Of<ILogger<QueueService>>());
             _controller = new QueueController(_queueServiceMock.Object);
         }
@@ -31,9 +38,9 @@ namespace UnitTests
         }
 
         [Fact]
-        public void GetJobs_ReturnsOk()
+        public async void GetJobs_ReturnsOk()
         {
-            var result = _controller.GetJobs(new PaginationParams
+            var result = await _controller.GetJobs(new PaginationParams
             {
                 PageNumber = 0,
                 PageSize = 500

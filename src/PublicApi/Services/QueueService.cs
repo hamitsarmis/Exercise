@@ -72,9 +72,10 @@ namespace PublicApi.Services
             return job.Id;
         }
 
-        public IEnumerable<Job> GetJobs(PaginationParams paginationParams)
+        public async Task<PagedList<Job>> GetJobs(PaginationParams paginationParams)
         {
-            return PagedList<Job>.Create(_allJobs.Values, paginationParams.PageNumber, paginationParams.PageSize);
+            return await Task.FromResult(PagedList<Job>.Create(_allJobs.Values, 
+                paginationParams.PageNumber, paginationParams.PageSize));
         }
 
         public Job GetJob(Guid jobId)

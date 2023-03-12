@@ -7,7 +7,7 @@ namespace PublicApi.Interfaces
     {
         Guid Enqueue(int[] item);
 
-        IEnumerable<Job> GetJobs(PaginationParams paginationParams);
+        Task<PagedList<Job>> GetJobs(PaginationParams paginationParams);
 
         Job GetJob(Guid jobId);
     }

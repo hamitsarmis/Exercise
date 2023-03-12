@@ -14,8 +14,14 @@ public class QueueServiceTests
 
     public QueueServiceTests()
     {
-        var configurationMock = new Mock<IConfiguration>();
-        _queueService = new QueueService(configurationMock.Object, new NullLogger<QueueService>());
+        var inMemorySettings = new List<KeyValuePair<string, string?>>
+        {
+            new KeyValuePair<string, string?>("PollingTime", "500")
+        };
+        IConfiguration configuration = new ConfigurationBuilder()
+            .AddInMemoryCollection(inMemorySettings)
+            .Build();
+        _queueService = new QueueService(configuration, new NullLogger<QueueService>());
     }
 
     [Fact]
@@ -46,7 +52,7 @@ public class QueueServiceTests
         await Task.Delay(1000);
         await _queueService.StopAsync(CancellationToken.None);
 
-        var allJobs = _queueService.GetJobs(new PublicApi.Helpers.PaginationParams
+        var allJobs = await _queueService.GetJobs(new PublicApi.Helpers.PaginationParams
         {
             PageSize = 10,
             PageNumber = 0

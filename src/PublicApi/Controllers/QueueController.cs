@@ -26,10 +26,10 @@ namespace PublicApi.Controllers
 
         [Authorize(Policy = "RequireAdminRole")]
         [HttpGet("get-jobs")]
-        public IActionResult GetJobs([FromQuery]
+        public async Task<IActionResult> GetJobs([FromQuery]
             PaginationParams paginationParams)
         {
-            var result = _queueService.GetJobs(paginationParams);
+            var result = await _queueService.GetJobs(paginationParams);
             return Ok(result);
         }
 
