@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PublicApi", "src\PublicApi\PublicApi.csproj", "{5089BADD-25B4-41AD-B770-DE1D7314028D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "src\Client\Client.csproj", "{470963BB-1700-4133-BDE6-7B46FD32921A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "tests\UnitTests\UnitTests.csproj", "{7BC1EEC3-5F15-4608-9936-0E0CC8201172}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5089BADD-25B4-41AD-B770-DE1D7314028D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5089BADD-25B4-41AD-B770-DE1D7314028D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5089BADD-25B4-41AD-B770-DE1D7314028D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5089BADD-25B4-41AD-B770-DE1D7314028D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{470963BB-1700-4133-BDE6-7B46FD32921A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{470963BB-1700-4133-BDE6-7B46FD32921A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{470963BB-1700-4133-BDE6-7B46FD32921A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{470963BB-1700-4133-BDE6-7B46FD32921A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7BC1EEC3-5F15-4608-9936-0E0CC8201172}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7BC1EEC3-5F15-4608-9936-0E0CC8201172}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7BC1EEC3-5F15-4608-9936-0E0CC8201172}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7BC1EEC3-5F15-4608-9936-0E0CC8201172}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5C04998E-9B55-4D20-AF66-7846EC966634}
+	EndGlobalSection
+EndGlobal
