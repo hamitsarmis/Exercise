@@ -86,11 +86,13 @@ namespace PublicApi.Services
 
         private void SortArray(Job job)
         {
-            job.Output = new int[job.Input.Length];
-            Array.Copy(job.Input, job.Output, job.Input.Length);
-            Array.Sort(job.Output);
-            job.Duration = DateTime.UtcNow - job.EnqueuedAt;
-            job.Status = JobState.Completed;
+            var newJob = job.Clone();
+            newJob.Output = new int[newJob.Input.Length];
+            Array.Copy(newJob.Input, newJob.Output, newJob.Input.Length);
+            Array.Sort(newJob.Output);
+            newJob.Duration = DateTime.UtcNow - newJob.EnqueuedAt;
+            newJob.Status = JobState.Completed;
+            _allJobs.AddOrUpdate(newJob.Id, newJob, (x, y) => newJob);
             _logger.LogInformation("Job {job.Id} completion duration is {job.Duration}", job.Id, job.Duration);
         }
 

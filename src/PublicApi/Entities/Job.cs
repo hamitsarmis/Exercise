@@ -15,5 +15,9 @@ namespace PublicApi.Entities
         public int[] Input { get; set; }
         public int[] Output { get; set; }
 
+        public Job Clone()
+        {
+            return (Job)MemberwiseClone();
+        }
     }
 }
