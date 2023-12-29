@@ -38,6 +38,8 @@ public class QueueServiceTests
         await Task.Delay(1000);
         await _queueService.StopAsync(CancellationToken.None);
 
+        job = _queueService.GetJob(id);
+
         Assert.NotNull(job);
         Assert.True(job.Status == PublicApi.JobState.Completed);
         Assert.True(string.Join("", job.Output) == "012345678910");
