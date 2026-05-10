@@ -25,7 +25,7 @@ public class QueueServiceTests
     }
 
     [Fact]
-    public async void Enqueues_And_Dequeues()
+    public async Task Enqueues_And_Dequeues()
     {
         var cancellationTokenSource = new CancellationTokenSource();
         await _queueService.StartAsync(cancellationTokenSource.Token);
@@ -46,7 +46,7 @@ public class QueueServiceTests
     }
 
     [Fact]
-    public async void GetJobs_ReturnsList()
+    public async Task GetJobs_ReturnsList()
     {
         var cancellationTokenSource = new CancellationTokenSource();
         await _queueService.StartAsync(cancellationTokenSource.Token);

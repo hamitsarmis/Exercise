@@ -38,7 +38,7 @@ namespace UnitTests
         }
 
         [Fact]
-        public async void GetJobs_ReturnsOk()
+        public async Task GetJobs_ReturnsOk()
         {
             var result = await _controller.GetJobs(new PaginationParams
             {

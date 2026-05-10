@@ -7,7 +7,7 @@ You can use this application to sort an integer array. The software service cons
 
 ## Running the app
 
-This solution is designed very simple and does not depend on any external infrastructure. You can just open up <mark>Exercise.sln</mark> on visual studio and run PublicApi web project.
+This solution is designed very simple and does not depend on any external infrastructure. You can just open up <mark>Exercise.slnx</mark> on visual studio and run PublicApi web project.
 
 #### To generate data:
 
