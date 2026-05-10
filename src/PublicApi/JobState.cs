@@ -1,8 +1,10 @@
-﻿namespace PublicApi
+namespace PublicApi
 {
     public enum JobState
     {
         Pending,
-        Completed
+        Running,
+        Completed,
+        Failed
     }
 }

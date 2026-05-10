@@ -84,8 +84,7 @@ namespace PublicApi.Services
             {
                 await foreach (var item in _channel.Reader.ReadAllAsync(cancellationToken))
                 {
-                    _logger.LogInformation("Job {JobId} is dequeued for sorting", item.Id);
-                    SortArray(item);
+                    ProcessJob(item);
                 }
             }
             catch (OperationCanceledException)
@@ -93,16 +92,33 @@ namespace PublicApi.Services
             }
         }
 
-        private void SortArray(Job job)
+        private void ProcessJob(Job job)
+        {
+            _logger.LogInformation("Job {JobId} is dequeued for sorting", job.Id);
+            job.Status = JobState.Running;
+            try
+            {
+                SortArray(job);
+                job.Duration = DateTime.UtcNow - job.EnqueuedAt;
+                // Status is written last so a reader observing Completed sees Output and Duration.
+                job.Status = JobState.Completed;
+                _logger.LogInformation("Job {JobId} completion duration is {Duration}", job.Id, job.Duration);
+            }
+            catch (Exception ex)
+            {
+                job.Duration = DateTime.UtcNow - job.EnqueuedAt;
+                job.Error = ex.Message;
+                job.Status = JobState.Failed;
+                _logger.LogError(ex, "Job {JobId} failed after {Duration}", job.Id, job.Duration);
+            }
+        }
+
+        private static void SortArray(Job job)
         {
             var output = new int[job.Input.Length];
             Array.Copy(job.Input, output, job.Input.Length);
             Array.Sort(output);
             job.Output = output;
-            job.Duration = DateTime.UtcNow - job.EnqueuedAt;
-            // Status is written last so a reader observing Completed sees Output and Duration.
-            job.Status = JobState.Completed;
-            _logger.LogInformation("Job {JobId} completion duration is {Duration}", job.Id, job.Duration);
         }
     }
 }

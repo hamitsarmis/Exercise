@@ -14,5 +14,6 @@ namespace PublicApi.Entities
         public JobState Status { get; set; }
         public int[] Input { get; set; }
         public int[] Output { get; set; }
+        public string Error { get; set; }
     }
 }
