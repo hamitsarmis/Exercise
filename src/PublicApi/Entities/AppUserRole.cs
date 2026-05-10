@@ -2,6 +2,6 @@ namespace PublicApi.Entities
 {
     public class AppUserRole
     {
-        public string RoleId { get; set; }
+        public required string RoleId { get; set; }
     }
 }

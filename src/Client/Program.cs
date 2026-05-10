@@ -62,4 +62,5 @@ await Task.WhenAll(taskList);
 Console.WriteLine($"Done with {totalRequests} total requests, {requestsFailedToSend} could not be sent, " +
     $"{otherExceptions} had other exceptions and {requestsFailedWithErrorStatus} failed on the server");
 
-Console.ReadLine();
+if (!Console.IsInputRedirected)
+    Console.ReadLine();

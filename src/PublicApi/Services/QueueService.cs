@@ -72,9 +72,9 @@ namespace PublicApi.Services
                 paginationParams.PageNumber, paginationParams.PageSize);
         }
 
-        public Job GetJob(Guid jobId)
+        public Job? GetJob(Guid jobId)
         {
-            _allJobs.TryGetValue(jobId, out Job result);
+            _allJobs.TryGetValue(jobId, out var result);
             return result;
         }
 

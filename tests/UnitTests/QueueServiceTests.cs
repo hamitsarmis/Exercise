@@ -31,6 +31,7 @@ public class QueueServiceTests
             var job = await WaitForTerminalAsync(id);
 
             Assert.Equal(JobState.Completed, job.Status);
+            Assert.NotNull(job.Output);
             Assert.Equal("012345678910", string.Join("", job.Output));
         }
         finally

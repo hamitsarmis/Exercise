@@ -12,8 +12,8 @@ namespace PublicApi.Entities
         public TimeSpan Duration { get; set; }
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public JobState Status { get; set; }
-        public int[] Input { get; set; }
-        public int[] Output { get; set; }
-        public string Error { get; set; }
+        public required int[] Input { get; set; }
+        public int[]? Output { get; set; }
+        public string? Error { get; set; }
     }
 }

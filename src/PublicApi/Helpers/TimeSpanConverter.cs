@@ -10,7 +10,9 @@ namespace PublicApi.Helpers
 
         public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            return TimeSpan.ParseExact(reader.GetString(), _format, CultureInfo.InvariantCulture);
+            var raw = reader.GetString()
+                ?? throw new JsonException("Expected a TimeSpan string, got null.");
+            return TimeSpan.ParseExact(raw, _format, CultureInfo.InvariantCulture);
         }
 
         public override void Write(Utf8JsonWriter writer, TimeSpan value, JsonSerializerOptions options)

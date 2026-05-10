@@ -9,6 +9,6 @@ namespace PublicApi.Interfaces
 
         PagedList<Job> GetJobs(PaginationParams paginationParams);
 
-        Job GetJob(Guid jobId);
+        Job? GetJob(Guid jobId);
     }
 }

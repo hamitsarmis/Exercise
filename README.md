@@ -53,6 +53,8 @@ You can use returned token as a bearer token.
 #### To disable or enable authentication and authorization:
 Just change UseAuthentication config value to true or false.
 By default it is disabled.
+#### TokenKey
+The JWT signing key is read from the `TokenKey` configuration value. A development-only key is provided in `appsettings.Development.json`. In any other environment the application will fail fast at startup unless `TokenKey` is supplied via an environment variable, user-secrets, or another configuration source.
 ### Run unit-tests
 
 You can either run the unit tests from terminal with these commands:
