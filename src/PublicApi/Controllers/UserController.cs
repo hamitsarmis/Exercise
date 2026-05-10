@@ -5,6 +5,7 @@ using PublicApi.Interfaces;
 
 namespace PublicApi.Controllers
 {
+    [ApiController]
     public class UserController : ControllerBase
     {
         private readonly ITokenService _tokenService;
@@ -14,8 +15,8 @@ namespace PublicApi.Controllers
             _tokenService = tokenService;
         }
 
-        [HttpPost("login")]
-        public IActionResult Login([FromBody]LoginDto loginDto)
+        [HttpPost("/login")]
+        public IActionResult Login(LoginDto loginDto)
         {
             var user = AppUser.ValidUsers.SingleOrDefault(x => x.UserName == loginDto.UserName);
 

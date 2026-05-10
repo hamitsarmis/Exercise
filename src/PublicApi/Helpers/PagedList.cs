@@ -1,26 +1,27 @@
-﻿namespace PublicApi.Helpers
+namespace PublicApi.Helpers
 {
-    public class PagedList<T> : List<T>
+    public class PagedList<T>
     {
-        public PagedList(IEnumerable<T> items, int count, int pageNumber, int pageSize)
+        public PagedList(IReadOnlyList<T> items, int count, int pageNumber, int pageSize)
         {
+            Items = items;
             CurrentPage = pageNumber;
-            TotalPages = (int)Math.Ceiling(count / (double)pageSize);
             PageSize = pageSize;
             TotalCount = count;
-            AddRange(items);
+            TotalPages = pageSize > 0 ? (int)Math.Ceiling(count / (double)pageSize) : 0;
         }
 
-        public int CurrentPage { get; set; }
-        public int TotalPages { get; set; }
-        public int PageSize { get; set; }
-        public int TotalCount { get; set; }
+        public IReadOnlyList<T> Items { get; }
+        public int CurrentPage { get; }
+        public int TotalPages { get; }
+        public int PageSize { get; }
+        public int TotalCount { get; }
 
         public static PagedList<T> Create(IEnumerable<T> source, int pageNumber, int pageSize)
         {
-            var count = source.Count();
-            var items = source.Skip(pageNumber * pageSize).Take(pageSize).ToList();
-            return new PagedList<T>(items, count, pageNumber, pageSize);
+            var snapshot = source as IReadOnlyCollection<T> ?? source.ToList();
+            var items = snapshot.Skip(pageNumber * pageSize).Take(pageSize).ToList();
+            return new PagedList<T>(items, snapshot.Count, pageNumber, pageSize);
         }
     }
 }

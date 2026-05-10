@@ -7,13 +7,14 @@ using PublicApi.Middleware;
 using PublicApi.Services;
 using System.Text;
 
-var config = new ConfigurationBuilder()
-    .AddJsonFile("appsettings.json", optional: false)
-    .Build();
-
 var builder = WebApplication.CreateBuilder(args);
 
+var tokenKey = builder.Configuration["TokenKey"]
+    ?? throw new InvalidOperationException("TokenKey is not configured.");
+
 builder.Services.AddSingleton<QueueService>();
+builder.Services.AddSingleton<IQueueService>(sp => sp.GetRequiredService<QueueService>());
+builder.Services.AddHostedService(sp => sp.GetRequiredService<QueueService>());
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -27,7 +28,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["TokenKey"])),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey)),
             ValidateIssuer = false,
             ValidateAudience = false,
         };
@@ -35,16 +36,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Logging.AddConsole();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
-if (!config.GetValue("UseAuthentication", false))
+if (!builder.Configuration.GetValue("UseAuthentication", false))
     builder.Services.AddSingleton<IAuthorizationHandler, AllowAnonymous>();
 
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();
-var appLifetime = app.Services.GetRequiredService<IHostApplicationLifetime>();
-var queueService = app.Services.GetRequiredService<QueueService>();
-
-appLifetime.ApplicationStarted.Register(async () => await queueService.StartAsync(appLifetime.ApplicationStopping));
 
 if (app.Environment.IsDevelopment())
 {

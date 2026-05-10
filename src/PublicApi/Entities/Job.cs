@@ -14,10 +14,5 @@ namespace PublicApi.Entities
         public JobState Status { get; set; }
         public int[] Input { get; set; }
         public int[] Output { get; set; }
-
-        public Job Clone()
-        {
-            return (Job)MemberwiseClone();
-        }
     }
 }

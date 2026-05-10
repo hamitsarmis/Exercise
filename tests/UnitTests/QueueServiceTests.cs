@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging.Abstractions;
-using Moq;
 using PublicApi.Entities;
 using PublicApi.Helpers;
 using PublicApi.Services;
@@ -54,7 +53,7 @@ public class QueueServiceTests
         await Task.Delay(1000);
         await _queueService.StopAsync(CancellationToken.None);
 
-        var allJobs = await _queueService.GetJobs(new PublicApi.Helpers.PaginationParams
+        var allJobs = _queueService.GetJobs(new PaginationParams
         {
             PageSize = 10,
             PageNumber = 0

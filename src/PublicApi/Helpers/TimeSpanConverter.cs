@@ -6,7 +6,7 @@ namespace PublicApi.Helpers
 {
     public class TimeSpanConverter : JsonConverter<TimeSpan>
     {
-        private const string _format = "mm\\:ss\\:fff";
+        private const string _format = "c";
 
         public override TimeSpan Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {

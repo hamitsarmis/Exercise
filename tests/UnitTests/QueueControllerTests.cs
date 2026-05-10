@@ -1,50 +1,59 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Moq;
 using PublicApi.Controllers;
+using PublicApi.Entities;
 using PublicApi.Helpers;
-using PublicApi.Services;
+using PublicApi.Interfaces;
 
 namespace UnitTests
 {
     public class QueueControllerTests
     {
-        private readonly Mock<QueueService> _queueServiceMock;
+        private readonly Mock<IQueueService> _queueServiceMock;
         private readonly QueueController _controller;
 
         public QueueControllerTests()
         {
-            var inMemorySettings = new List<KeyValuePair<string, string?>>
-            {
-                new KeyValuePair<string, string?>("PollingTime", "500")
-            };
-            IConfiguration configuration = new ConfigurationBuilder()
-                .AddInMemoryCollection(inMemorySettings)
-                .Build();
-            _queueServiceMock = new Mock<QueueService>(configuration,
-                Mock.Of<ILogger<QueueService>>());
-            _controller = new QueueController(_queueServiceMock.Object);
+            _queueServiceMock = new Mock<IQueueService>();
+            IConfiguration configuration = new ConfigurationBuilder().Build();
+            _controller = new QueueController(_queueServiceMock.Object, configuration);
         }
 
         [Fact]
         public void Enqueue_ReturnsOk()
         {
+            var expectedId = Guid.NewGuid();
+            _queueServiceMock.Setup(x => x.Enqueue(It.IsAny<int[]>())).Returns(expectedId);
+
             int[] input = new int[] { 1, 10, 2, 9 };
             var result = _controller.Enqueue(input);
 
             Assert.IsType<OkObjectResult>(result);
-            Assert.IsType<Guid>(((OkObjectResult)result).Value);
+            Assert.Equal(expectedId, ((OkObjectResult)result).Value);
         }
 
         [Fact]
-        public async Task GetJobs_ReturnsOk()
+        public void Enqueue_NullInput_ReturnsBadRequest()
         {
-            var result = await _controller.GetJobs(new PaginationParams
+            var result = _controller.Enqueue(null!);
+
+            Assert.IsType<BadRequestObjectResult>(result);
+        }
+
+        [Fact]
+        public void GetJobs_ReturnsOk()
+        {
+            _queueServiceMock
+                .Setup(x => x.GetJobs(It.IsAny<PaginationParams>()))
+                .Returns(new PagedList<Job>(Array.Empty<Job>(), 0, 0, 10));
+
+            var result = _controller.GetJobs(new PaginationParams
             {
                 PageNumber = 0,
                 PageSize = 500
             });
+
             Assert.IsType<OkObjectResult>(result);
         }
 
@@ -54,6 +63,5 @@ namespace UnitTests
             var result = _controller.GetJob(Guid.NewGuid());
             Assert.IsType<NotFoundResult>(result);
         }
-
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
+using System.Threading.Channels;
 using PublicApi.Entities;
 using PublicApi.Helpers;
 using PublicApi.Interfaces;
@@ -7,55 +8,47 @@ namespace PublicApi.Services
 {
     public class QueueService : IHostedService, IQueueService
     {
-        private readonly ConcurrentQueue<Job> _queue;
+        private readonly Channel<Job> _channel;
         private readonly ConcurrentDictionary<Guid, Job> _allJobs;
         private readonly ILogger<QueueService> _logger;
-        private readonly int _pollingTime = 500;
-        private CancellationTokenSource _cancellationTokenSource;
+        private readonly int _consumerCount;
+        private Task[] _consumers = Array.Empty<Task>();
 
         public QueueService(IConfiguration configuration, ILogger<QueueService> logger)
         {
-            _queue = new();
+            _channel = Channel.CreateUnbounded<Job>(new UnboundedChannelOptions
+            {
+                SingleReader = false,
+                SingleWriter = false
+            });
             _allJobs = new();
-            _pollingTime = configuration.GetValue("PollingTime", defaultValue: 500);
+            _consumerCount = configuration.GetValue("ConsumerCount", Environment.ProcessorCount);
             _logger = logger;
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        public Task StartAsync(CancellationToken cancellationToken)
         {
-            _logger.LogInformation("Queue Service has started.");
-            _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-
-            await Task.Factory.StartNew(async () =>
+            _logger.LogInformation("Queue Service starting with {ConsumerCount} consumers.", _consumerCount);
+            _consumers = new Task[_consumerCount];
+            for (int i = 0; i < _consumerCount; i++)
             {
-                while (!_cancellationTokenSource.IsCancellationRequested)
-                {
-                    if (_queue.IsEmpty)
-                    {
-                        await Task.Delay(_pollingTime, _cancellationTokenSource.Token);
-                        continue;
-                    }
-                    try
-                    {
-                        if (_queue.TryDequeue(out var item))
-                        {
-                            _logger.LogInformation("Job {item.Id} is dequeued for sorting", item.Id);
-                            await Task.Run(() => SortArray(item), _cancellationTokenSource.Token);
-                        }
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        break;
-                    }
-                }
-                _logger.LogInformation("Queue Service has stopped.");
-            }, cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                _consumers[i] = Task.Run(() => ConsumeAsync(cancellationToken), cancellationToken);
+            }
+            return Task.CompletedTask;
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            _cancellationTokenSource?.Cancel();
-            await Task.CompletedTask;
+            _channel.Writer.TryComplete();
+            if (_consumers.Length == 0) return;
+            try
+            {
+                await Task.WhenAll(_consumers).WaitAsync(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            _logger.LogInformation("Queue Service has stopped.");
         }
 
         public Guid Enqueue(int[] item)
@@ -66,16 +59,17 @@ namespace PublicApi.Services
                 EnqueuedAt = DateTime.UtcNow,
                 Input = item
             };
-            _queue.Enqueue(job);
             _allJobs.TryAdd(job.Id, job);
-            _logger.LogInformation("Job {job.Id} is enqueued at: {job.EnqueuedAt}", job.Id, job.EnqueuedAt);
+            if (!_channel.Writer.TryWrite(job))
+                throw new InvalidOperationException("Queue is no longer accepting jobs.");
+            _logger.LogInformation("Job {JobId} is enqueued at: {EnqueuedAt}", job.Id, job.EnqueuedAt);
             return job.Id;
         }
 
-        public async Task<PagedList<Job>> GetJobs(PaginationParams paginationParams)
+        public PagedList<Job> GetJobs(PaginationParams paginationParams)
         {
-            return await Task.FromResult(PagedList<Job>.Create(_allJobs.Values, 
-                paginationParams.PageNumber, paginationParams.PageSize));
+            return PagedList<Job>.Create(_allJobs.Values,
+                paginationParams.PageNumber, paginationParams.PageSize);
         }
 
         public Job GetJob(Guid jobId)
@@ -84,18 +78,31 @@ namespace PublicApi.Services
             return result;
         }
 
-        private void SortArray(Job job)
+        private async Task ConsumeAsync(CancellationToken cancellationToken)
         {
-            var newJob = job.Clone();
-            newJob.Output = new int[newJob.Input.Length];
-            Array.Copy(newJob.Input, newJob.Output, newJob.Input.Length);
-            Array.Sort(newJob.Output);
-            newJob.Duration = DateTime.UtcNow - newJob.EnqueuedAt;
-            newJob.Status = JobState.Completed;
-            _allJobs.AddOrUpdate(newJob.Id, newJob, (x, y) => newJob);
-            _logger.LogInformation("Job {job.Id} completion duration is {job.Duration}", job.Id, job.Duration);
+            try
+            {
+                await foreach (var item in _channel.Reader.ReadAllAsync(cancellationToken))
+                {
+                    _logger.LogInformation("Job {JobId} is dequeued for sorting", item.Id);
+                    SortArray(item);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+            }
         }
 
+        private void SortArray(Job job)
+        {
+            var output = new int[job.Input.Length];
+            Array.Copy(job.Input, output, job.Input.Length);
+            Array.Sort(output);
+            job.Output = output;
+            job.Duration = DateTime.UtcNow - job.EnqueuedAt;
+            // Status is written last so a reader observing Completed sees Output and Duration.
+            job.Status = JobState.Completed;
+            _logger.LogInformation("Job {JobId} completion duration is {Duration}", job.Id, job.Duration);
+        }
     }
-
 }
