@@ -61,6 +61,6 @@ cd tests/UnitTests
 dotnet test
 ```
 Or use Test Explorer on Visual Studio. <br/><br/>
-The main purpose of this project is to demonstrate the fundemantals of dotnet WebApi and multithreaded queue processing.<br/>
+The main purpose of this project is to demonstrate the fundamentals of dotnet WebApi and multithreaded queue processing.<br/>
 
 Please feel free to ask if you have any questions.

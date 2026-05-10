@@ -18,33 +18,32 @@ string remoteAddress = appSettings?.RemoteAddress ?? "https://localhost:7190/";
 Console.WriteLine($"Creating and sending {concurrentWorkers * requestsPerWorker:N0}" +
     $" requests to {remoteAddress}");
 
+using var httpClient = new HttpClient
+{
+    BaseAddress = new Uri(remoteAddress),
+    Timeout = TimeSpan.FromHours(1),
+};
+
 var taskList = new List<Task>();
 
 for (int i = 0; i < concurrentWorkers; i++)
 {
     taskList.Add(Task.Run(async () =>
     {
-
         for (int j = 0; j < requestsPerWorker; j++)
         {
             Interlocked.Increment(ref totalRequests);
 
-            Random random = new();
-            int arrayLength = random.Next(1, 10000);
-            int[] array = Enumerable.Range(0, arrayLength).
-                Select(i => random.Next(100)).ToArray();
+            int arrayLength = Random.Shared.Next(1, 10000);
+            int[] array = new int[arrayLength];
+            for (int k = 0; k < arrayLength; k++)
+                array[k] = Random.Shared.Next(100);
             try
             {
-                using var client = new HttpClient()
-                {
-                    Timeout = TimeSpan.FromHours(1),
-                };
-                client.BaseAddress = new Uri(remoteAddress);
-                var result = await client.PostAsync("/Queue/enqueue",
+                var result = await httpClient.PostAsync("/Queue/enqueue",
                     new StringContent(JsonSerializer.Serialize(array), Encoding.UTF8, "application/json"));
                 if (!result.IsSuccessStatusCode)
                     Interlocked.Increment(ref requestsFailedWithErrorStatus);
-
             }
             catch (HttpRequestException)
             {
@@ -55,7 +54,6 @@ for (int i = 0; i < concurrentWorkers; i++)
                 Interlocked.Increment(ref otherExceptions);
             }
         }
-
     }));
 }
 

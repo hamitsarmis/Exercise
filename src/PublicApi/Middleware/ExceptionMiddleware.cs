@@ -6,6 +6,9 @@ namespace PublicApi.Middleware
 {
     public class ExceptionMiddleware
     {
+        private static readonly JsonSerializerOptions _jsonOptions =
+            new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
+
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionMiddleware> _logger;
         private readonly IHostEnvironment _env;
@@ -33,9 +36,7 @@ namespace PublicApi.Middleware
                     ? new BaseException(context.Response.StatusCode, ex.Message, ex.StackTrace?.ToString())
                     : new BaseException(context.Response.StatusCode, "Internal Server Error");
 
-                var options = new JsonSerializerOptions{PropertyNamingPolicy = JsonNamingPolicy.CamelCase};
-
-                var json = JsonSerializer.Serialize(response, options);
+                var json = JsonSerializer.Serialize(response, _jsonOptions);
 
                 await context.Response.WriteAsync(json);
             }
